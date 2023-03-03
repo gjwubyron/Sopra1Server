@@ -1,9 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.entity;
 
-import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Date;
 
 /**
  * Internal User Representation
@@ -12,7 +12,7 @@ import java.io.Serializable;
  * Every variable will be mapped into a database field with the @Column
  * annotation
  * - nullable = false -> this cannot be left empty
- * - unique = true -> this value must be unqiue across the database -> composes
+ * - unique = true -> this value must be unique across the database -> composes
  * the primary key
  */
 @Entity
@@ -26,16 +26,22 @@ public class User implements Serializable {
   private Long id;
 
   @Column(nullable = false)
-  private String name;
+  private String password;
 
   @Column(nullable = false, unique = true)
   private String username;
+
+  @Column(nullable = false)
+  private Date creation_date;
 
   @Column(nullable = false, unique = true)
   private String token;
 
   @Column(nullable = false)
-  private UserStatus status;
+  private String status;
+
+    @Column()
+    private LocalDate birthday;
 
   public Long getId() {
     return id;
@@ -43,14 +49,6 @@ public class User implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public String getUsername() {
@@ -69,11 +67,36 @@ public class User implements Serializable {
     this.token = token;
   }
 
-  public UserStatus getStatus() {
+  public String getStatus() {
     return status;
   }
 
-  public void setStatus(UserStatus status) {
+  public void setStatus(String status) {
     this.status = status;
   }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Date getCreation_date() {
+        return creation_date;
+    }
+
+    public void setCreation_date(Date creation_date) {
+        this.creation_date = creation_date;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
 }

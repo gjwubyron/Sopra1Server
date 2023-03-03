@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
-import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import org.slf4j.Logger;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,9 +39,17 @@ public class UserService {
     return this.userRepository.findAll();
   }
 
+  public User getUser(Long userId){return getByUserId(userId);}
+    public void updateUser(User oldUser, User newUser){
+      checkIfUserExists(newUser);
+      oldUser.setUsername(newUser.getUsername());
+      oldUser.setBirthday(newUser.getBirthday());
+  }
+
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setStatus("OFFLINE");
+    newUser.setCreation_date(new Date());
     checkIfUserExists(newUser);
     // saves the given entity but data is only persisted in the database once
     // flush() is called
@@ -50,6 +58,17 @@ public class UserService {
 
     log.debug("Created Information for User: {}", newUser);
     return newUser;
+  }
+  public User checkUser(User user){
+      User existedUser = userRepository.findByUsername(user.getUsername());
+      if (existedUser == null){
+          String baseErrorMessage = "User with username \"%s\" does not exist.";
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, user.getUsername()));
+      }
+      if (!user.getPassword().equals(existedUser.getPassword())) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect password");
+      }
+      return existedUser;
   }
 
   /**
@@ -64,16 +83,19 @@ public class UserService {
    */
   private void checkIfUserExists(User userToBeCreated) {
     User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    User userByName = userRepository.findByName(userToBeCreated.getName());
 
-    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "username and the name", "are"));
-    } else if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
-    } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
+    String baseErrorMessage = "The %s provided %s not unique.";
+    if (userByUsername != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
     }
+  }
+  private User getByUserId(Long userId){
+      User userByUserId = userRepository.findById(userId.intValue());
+
+      String baseErrorMessage = "user with userId %s was not found";
+      if (userByUserId == null){
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(baseErrorMessage, userId));
+      }
+      return userByUserId;
   }
 }

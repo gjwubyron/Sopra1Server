@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,14 @@ public class UserController {
     return userGetDTOs;
   }
 
+    @GetMapping("/users/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetDTO getUser(@PathVariable Long userId) {
+      User user = userService.getUser(userId);
+      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+    }
+
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
@@ -53,5 +62,22 @@ public class UserController {
     User createdUser = userService.createUser(userInput);
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+  }
+
+  @PutMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseBody
+  public void updateUser(@PathVariable Long userId, @RequestBody UserPutDTO userPutDTO){
+      User oldUser = userService.getUser(userId);
+      userService.updateUser(oldUser, DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO));
+  }
+
+  @PostMapping("/registered-users")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDTO checkUser(@RequestBody UserPostDTO userPostDTO){
+      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+      User checkedUser = userService.checkUser(userInput);
+      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(checkedUser);
   }
 }

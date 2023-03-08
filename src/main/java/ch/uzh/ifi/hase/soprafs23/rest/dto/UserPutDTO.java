@@ -1,18 +1,17 @@
 package ch.uzh.ifi.hase.soprafs23.rest.dto;
 
-import java.time.LocalDate;
-
 public class UserPutDTO {
     private String username;
 
-    private LocalDate birthday;
+    private String birthday;
+    private String status;
 
 
-    public LocalDate getBirthday() {
+    public String getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(LocalDate birthday) {
+    public void setBirthday(String birthday) {
         this.birthday = birthday;
     }
 
@@ -22,5 +21,13 @@ public class UserPutDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

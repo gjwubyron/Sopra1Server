@@ -35,15 +35,40 @@ public class UserService {
     this.userRepository = userRepository;
   }
 
-  public List<User> getUsers() {
-    return this.userRepository.findAll();
+  public List<User> getUsers(String token) {
+      if (userRepository.findByToken(token) == null) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
+      }
+      return this.userRepository.findAll();
   }
 
-  public User getUser(Long userId){return getByUserId(userId);}
-    public void updateUser(User oldUser, User newUser){
+  public User getUser(Long userId, String token){
+      User user = getByUserId(userId);
+      if (userRepository.findByToken(token) == null) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
+      }
+      return user;
+  }
+    public String updateUser(Long userId, String token, User newUser){
+      User oldUser = getByUserId(userId);
+
+        if (!oldUser.getToken().equals(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized request");
+        }
+
       checkIfUserExists(newUser);
-      oldUser.setUsername(newUser.getUsername());
-      oldUser.setBirthday(newUser.getBirthday());
+
+        if(newUser.getUsername() != null){
+            oldUser.setUsername(newUser.getUsername());
+        }
+      if(newUser.getBirthday() != null){
+          oldUser.setBirthday(newUser.getBirthday());
+      }
+      if(newUser.getStatus() != null){
+          oldUser.setStatus(newUser.getStatus());
+      }
+
+      return "User Updated";
   }
 
   public User createUser(User newUser) {
